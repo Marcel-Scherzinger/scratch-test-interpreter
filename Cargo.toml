@@ -1,0 +1,24 @@
+[package]
+name = "scratch-test-interpreter"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+derive-getters = "0.5.0"
+rand = { version = "0.10.0", optional = true }
+thiserror = "2.0"
+
+[dependencies.svalue]
+git = "https://github.com/Marcel-Scherzinger/scratch-test-value"
+package = "scratch-test-value"
+default-features = false
+
+[dependencies.smodel]
+git = "https://github.com/Marcel-Scherzinger/scratch-test-model"
+package = "scratch-test-model"
+default-features = false
+
+[features]
+default = ["rand"]
+rand = ["dep:rand"]
+
