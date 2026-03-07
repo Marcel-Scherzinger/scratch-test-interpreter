@@ -25,7 +25,7 @@ pub enum Action {
     },
 }
 
-#[derive(Debug, PartialEq, derive_getters::Getters)]
+#[derive(Debug, Default, PartialEq, derive_getters::Getters)]
 pub struct DefaultState<'a> {
     variables: HashMap<Variable, SValue>,
     lists: HashMap<List, SList>,
