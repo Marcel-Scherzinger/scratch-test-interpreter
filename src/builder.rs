@@ -18,6 +18,13 @@ pub struct Report<'a, S: State> {
     error_code: Option<RunError<S::Error>>,
     limits: Limits,
 }
+
+impl<'a, S: State> Report<'a, S> {
+    pub fn take_parts(self) -> (S, Option<RunError<S::Error>>, Limits) {
+        (self.state, self.error_code, self.limits)
+    }
+}
+
 #[allow(unused)]
 impl Interpreter {
     pub fn new_restrictive() -> Self {
