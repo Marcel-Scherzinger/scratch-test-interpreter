@@ -27,20 +27,20 @@ pub enum Action {
 }
 
 #[derive(Debug, Default, PartialEq, derive_getters::Getters)]
-pub struct DefaultState<'a> {
+pub struct DefaultState {
     variables: HashMap<Variable, SValue>,
     lists: HashMap<List, SList>,
     actions: Vec<Action>,
 
     answer_index: Option<usize>,
-    answer_inputs: Vec<&'a str>,
+    answer_inputs: Vec<svalue::ARc<str>>,
 
     #[cfg(feature = "rand")]
     randoms: Option<rand::rngs::StdRng>,
 }
 
 #[allow(unused)]
-impl<'a> DefaultState<'a> {
+impl DefaultState {
     pub fn new() -> Self {
         DefaultState {
             variables: HashMap::new(),
@@ -57,7 +57,7 @@ impl<'a> DefaultState<'a> {
         self.randoms = rng;
         self
     }
-    pub fn set_answers(&mut self, answers: Vec<&'a str>) -> &mut Self {
+    pub fn set_answers(&mut self, answers: Vec<svalue::ARc<str>>) -> &mut Self {
         self.answer_inputs = answers;
         self.answer_index = None;
         self
@@ -84,7 +84,7 @@ pub enum DefaultStateError {
     NoMoreAnswers,
 }
 
-impl<'a> State for DefaultState<'a> {
+impl State for DefaultState {
     type Error = DefaultStateError;
 
     fn ask_question(&mut self, question: SValue) -> Result<(), Self::Error> {
@@ -102,7 +102,8 @@ impl<'a> State for DefaultState<'a> {
                 .answer_inputs
                 .get(index)
                 .or(self.answer_inputs.last())
-                .unwrap_or(&""))
+                .map(|s| s.as_ref())
+                .unwrap_or(""))
         } else {
             Ok("")
         }
@@ -262,7 +263,7 @@ fn unknown_list(list_id: &List) -> DefaultStateError {
     DefaultStateError::ListNotFound(list_id.clone())
 }
 
-impl<'a> DefaultState<'a> {
+impl DefaultState {
     #[allow(unused)]
     fn list_mut(&mut self, list_id: &List) -> Result<&mut SList, DefaultStateError> {
         self.lists
