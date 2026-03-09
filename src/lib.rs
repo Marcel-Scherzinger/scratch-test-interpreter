@@ -5,4 +5,5 @@ mod interpreter;
 mod state;
 
 pub use builder::{Interpreter, Limits, Report};
+pub use error::RunError;
 pub use state::State;
