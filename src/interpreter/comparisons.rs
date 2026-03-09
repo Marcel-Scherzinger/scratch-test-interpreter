@@ -42,12 +42,12 @@ impl<'a, S: State> RunningInterpreter<'a, S> {
             C::OperatorGt { operand1, operand2 } => {
                 let a = self.eval_expr(operand1)?;
                 let b = self.eval_expr(operand2)?;
-                a < b
+                a > b
             }
             C::OperatorLt { operand1, operand2 } => {
                 let a = self.eval_expr(operand1)?;
                 let b = self.eval_expr(operand2)?;
-                a > b
+                a < b
             }
             C::OperatorEquals { operand1, operand2 } => {
                 let a = self.eval_expr(operand1)?;
