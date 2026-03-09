@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+#[cfg(feature = "rand")]
 use rand::RngExt;
 use smodel::attrs::{List, Variable};
 use svalue::{SList, SNumber, SValue};
@@ -34,6 +35,7 @@ pub struct DefaultState<'a> {
     answer_index: Option<usize>,
     answer_inputs: Vec<&'a str>,
 
+    #[cfg(feature = "rand")]
     randoms: Option<rand::rngs::StdRng>,
 }
 
@@ -46,9 +48,11 @@ impl<'a> DefaultState<'a> {
             actions: vec![],
             answer_index: None,
             answer_inputs: vec![],
+            #[cfg(feature = "rand")]
             randoms: None,
         }
     }
+    #[cfg(feature = "rand")]
     pub fn set_randoms(&mut self, rng: Option<rand::rngs::StdRng>) -> &mut Self {
         self.randoms = rng;
         self
@@ -104,6 +108,15 @@ impl<'a> State for DefaultState<'a> {
         }
     }
 
+    #[cfg(not(feature = "rand"))]
+    fn request_int_random(
+        &mut self,
+        range: std::ops::RangeInclusive<i64>,
+    ) -> Result<i64, Self::Error> {
+        Err(DefaultStateError::RandomsDisabled)
+    }
+
+    #[cfg(feature = "rand")]
     fn request_int_random(
         &mut self,
         range: std::ops::RangeInclusive<i64>,
@@ -122,6 +135,14 @@ impl<'a> State for DefaultState<'a> {
         Ok(received)
     }
 
+    #[cfg(not(feature = "rand"))]
+    fn request_float_random(
+        &mut self,
+        range: std::ops::RangeInclusive<f64>,
+    ) -> Result<f64, Self::Error> {
+        Err(DefaultStateError::RandomsDisabled)
+    }
+    #[cfg(feature = "rand")]
     fn request_float_random(
         &mut self,
         range: std::ops::RangeInclusive<f64>,
