@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum StackItem<T> {
     Normal(T),
     CountLoop(T, usize),
@@ -28,7 +28,7 @@ impl<T> StackItem<T> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Stack<T>(Vec<StackItem<T>>);
 
 impl<T> From<Vec<StackItem<T>>> for Stack<T> {

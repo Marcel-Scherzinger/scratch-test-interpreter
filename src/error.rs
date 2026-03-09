@@ -2,7 +2,7 @@ use crate::State;
 
 pub type RResult<T, S> = Result<T, RunError<<S as State>::Error>>;
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, PartialEq, thiserror::Error)]
 pub enum InvalidFileError {
     #[error("statement calls procedure that doesn't exist in file")]
     CantFindProcedureForCall,
@@ -18,7 +18,7 @@ pub enum InvalidFileError {
     ReachedUnknownBlock(smodel::Id),
 }
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, PartialEq, thiserror::Error)]
 pub enum UserError {
     #[error("without a body no data can change, so a condition-based loop will never stop")]
     ConditionLoopWithoutBodyNeverStops,
@@ -27,7 +27,7 @@ pub enum UserError {
     #[error("an infinite loop without a body can never halt")]
     InfiniteLoopWithoutBodyNeverStops,
 }
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, PartialEq, thiserror::Error)]
 pub enum UnsupportedError {
     #[error("blocks related to cloning are not supported")]
     CloneBlocksNotSupported(smodel::Id),
@@ -41,7 +41,7 @@ pub enum UnsupportedError {
     UnsupportedMotionBlock,
 }
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, PartialEq, thiserror::Error)]
 pub enum InternalError {
     #[error("saved instruction asks to remove stack frame, but no frames are stored")]
     PopOnEmptyArgumentFramesStack,
@@ -53,7 +53,7 @@ pub enum InternalError {
     PopOnEmptyProgramStack,
 }
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, PartialEq, thiserror::Error)]
 pub enum LimitError {
     #[error("a string operation produced a text that is longer than allowed")]
     StringExceededLengthLimit(usize),
@@ -63,7 +63,7 @@ pub enum LimitError {
     MaxStackSizeExceeded,
 }
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, PartialEq, thiserror::Error)]
 pub enum RunError<SErr> {
     #[error("state: {0}")]
     State(SErr),

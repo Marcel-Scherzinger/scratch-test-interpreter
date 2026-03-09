@@ -19,6 +19,7 @@ use crate::{
     interpreter::{call_procedures::ProcedureArgumentsFrame, stack::StackItem},
 };
 
+#[derive(Debug, PartialEq)]
 pub struct RunningInterpreter<'a, S> {
     doc: &'a ProjectDoc,
     execute_stmt_count: usize,
