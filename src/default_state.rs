@@ -5,7 +5,7 @@ use rand::RngExt;
 use smodel::attrs::{List, Variable};
 use svalue::{SList, SNumber, SValue};
 
-use crate::state::State;
+use crate::state::{OutputKind, State};
 
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
 pub enum Action {
@@ -52,6 +52,17 @@ impl DefaultState {
             randoms: None,
         }
     }
+
+    pub fn output_actions(&self) -> impl DoubleEndedIterator<Item = (&OutputKind, &SValue)> {
+        self.actions().iter().flat_map(|a| {
+            if let Action::Output { kind, message } = a {
+                Some((kind, message))
+            } else {
+                None
+            }
+        })
+    }
+
     #[cfg(feature = "rand")]
     pub fn set_randoms(&mut self, rng: Option<rand::rngs::StdRng>) -> &mut Self {
         self.randoms = rng;
