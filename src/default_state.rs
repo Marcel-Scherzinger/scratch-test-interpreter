@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 #[cfg(feature = "rand")]
 use rand::RngExt;
-use smodel::attrs::{List, Variable};
+use smodel::{
+    ProjectDoc,
+    attrs::{List, Variable},
+};
 use svalue::{SList, SNumber, SValue};
 
 use crate::state::{OutputKind, State};
@@ -51,6 +54,39 @@ impl DefaultState {
             #[cfg(feature = "rand")]
             randoms: None,
         }
+    }
+
+    pub fn add_data_from_doc(&mut self, doc: &ProjectDoc, max_length: i64) -> &mut Self {
+        self.add_variables_from_doc(doc)
+            .add_lists_from_doc(doc, max_length)
+    }
+
+    pub fn add_variables_from_doc(&mut self, doc: &ProjectDoc) -> &mut Self {
+        self.variables.extend(
+            doc.targets()
+                .iter()
+                .flat_map(|t| t.variables().values())
+                .cloned(),
+        );
+        self
+    }
+
+    pub fn add_lists_from_doc(&mut self, doc: &ProjectDoc, max_length: i64) -> &mut Self {
+        self.lists
+            .extend(
+                doc.targets()
+                    .iter()
+                    .flat_map(|t| t.lists().values())
+                    .map(|(dataid, v)| {
+                        let mut list = SList::new(max_length);
+                        for i in v {
+                            // TODO: rethink
+                            list.append_item(i.clone());
+                        }
+                        (dataid.clone(), list)
+                    }),
+            );
+        self
     }
 
     pub fn output_actions(&self) -> impl DoubleEndedIterator<Item = (&OutputKind, &SValue)> {
