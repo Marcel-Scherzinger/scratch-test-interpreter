@@ -106,7 +106,7 @@ impl DefaultState {
 
     fn use_uninitialized_list(&mut self, list_id: &List) -> Result<(), <Self as State>::Error> {
         let list_id = Either::Right(list_id.clone());
-        if self.initialized_data.contains(&list_id) {
+        if !self.initialized_data.contains(&list_id) {
             self.uninitialized_usages.insert(list_id);
         }
         Ok(())
@@ -117,7 +117,7 @@ impl DefaultState {
         variable_id: &Variable,
     ) -> Result<(), <Self as State>::Error> {
         let variable_id = Either::Left(variable_id.clone());
-        if self.initialized_data.contains(&variable_id) {
+        if !self.initialized_data.contains(&variable_id) {
             self.uninitialized_usages.insert(variable_id);
         }
         Ok(())
