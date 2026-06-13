@@ -1,5 +1,6 @@
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 
+use either::Either;
 #[cfg(feature = "rand")]
 use rand::RngExt;
 use smodel::{
@@ -31,6 +32,18 @@ pub enum Action {
 
 #[derive(Debug, Default, PartialEq, derive_getters::Getters)]
 pub struct DefaultState {
+    /// All data (variable/list) identifiers which were
+    /// used before initialized
+    ///
+    /// - variables are initialized by set operation
+    /// - lists are initialized by deleting all elements with clear block
+    uninitialized_usages: BTreeSet<Either<Variable, List>>,
+    /// All data (variable/list) identifiers which were
+    /// used to initialize the corresponding data.
+    ///
+    /// - variables are initialized by set operation
+    /// - lists are initialized by deleting all elements with clear block
+    initialized_data: BTreeSet<Either<Variable, List>>,
     variables: HashMap<Variable, SValue>,
     lists: HashMap<List, SList>,
     actions: Vec<Action>,
@@ -46,6 +59,8 @@ pub struct DefaultState {
 impl DefaultState {
     pub fn new() -> Self {
         DefaultState {
+            uninitialized_usages: Default::default(),
+            initialized_data: Default::default(),
             variables: HashMap::new(),
             lists: HashMap::new(),
             actions: vec![],
@@ -87,6 +102,25 @@ impl DefaultState {
                     }),
             );
         self
+    }
+
+    fn use_uninitialized_list(&mut self, list_id: &List) -> Result<(), <Self as State>::Error> {
+        let list_id = Either::Right(list_id.clone());
+        if self.initialized_data.contains(&list_id) {
+            self.uninitialized_usages.insert(list_id);
+        }
+        Ok(())
+    }
+
+    fn use_uninitialized_variable(
+        &mut self,
+        variable_id: &Variable,
+    ) -> Result<(), <Self as State>::Error> {
+        let variable_id = Either::Left(variable_id.clone());
+        if self.initialized_data.contains(&variable_id) {
+            self.uninitialized_usages.insert(variable_id);
+        }
+        Ok(())
     }
 
     pub fn output_actions(&self) -> impl DoubleEndedIterator<Item = (&OutputKind, &SValue)> {
@@ -227,9 +261,11 @@ impl State for DefaultState {
             .get_mut(var_id)
             .ok_or_else(|| unknown_var(var_id))?;
         *store = value;
+        self.initialized_data.insert(Either::Left(var_id.clone()));
         Ok(())
     }
     fn data_read_variable(&mut self, var_id: &Variable) -> Result<&SValue, Self::Error> {
+        self.use_uninitialized_variable(var_id)?;
         self.variables
             .get(var_id)
             .ok_or_else(|| unknown_var(var_id))
@@ -240,6 +276,7 @@ impl State for DefaultState {
         one_based_index: &SValue,
         item: SValue,
     ) -> Result<(), Self::Error> {
+        self.use_uninitialized_list(list_id)?;
         self.list_mut(list_id)?
             .insert_item_at(one_based_index, item, &mut ())
             .map_err(|_err| DefaultStateError::ListFull {
@@ -253,11 +290,13 @@ impl State for DefaultState {
         one_based_index: &SValue,
         item: SValue,
     ) -> Result<(), Self::Error> {
+        self.use_uninitialized_list(list_id)?;
         self.list_mut(list_id)?
             .replace_nth_item(one_based_index, item, &mut ());
         Ok(())
     }
     fn data_append_to_list(&mut self, list_id: &List, item: SValue) -> Result<(), Self::Error> {
+        self.use_uninitialized_list(list_id)?;
         self.list_mut(list_id)?
             .append_item(item)
             .map_err(|_err| DefaultStateError::ListFull {
@@ -270,6 +309,7 @@ impl State for DefaultState {
         list_id: &List,
         item: &SValue,
     ) -> Result<bool, Self::Error> {
+        self.use_uninitialized_list(list_id)?;
         Ok(self.list_mut(list_id)?.contains_item(item))
     }
     fn data_delete_of_list(
@@ -277,17 +317,21 @@ impl State for DefaultState {
         list_id: &List,
         one_based_index: &SValue,
     ) -> Result<(), Self::Error> {
+        self.use_uninitialized_list(list_id)?;
         self.list_mut(list_id)?.delete_nth(one_based_index, &mut ());
         Ok(())
     }
     fn data_delete_all_of_list(&mut self, list_id: &List) -> Result<(), Self::Error> {
+        self.initialized_data.insert(Either::Right(list_id.clone()));
         self.list_mut(list_id)?.delete_all();
         Ok(())
     }
     fn data_read_textual_list_repr(&mut self, list_id: &List) -> Result<SValue, Self::Error> {
+        self.use_uninitialized_list(list_id)?;
         Ok(self.list(list_id)?.textual_representation().into())
     }
     fn data_item_num_of_list(&mut self, list_id: &List, item: &SValue) -> Result<i64, Self::Error> {
+        self.use_uninitialized_list(list_id)?;
         Ok(self.list(list_id)?.first_index_of_item_in_list(item))
     }
     fn data_item_of_list(
@@ -295,9 +339,11 @@ impl State for DefaultState {
         list_id: &List,
         one_based_index: &SValue,
     ) -> Result<SValue, Self::Error> {
+        self.use_uninitialized_list(list_id)?;
         Ok(self.list(list_id)?.nth_item(one_based_index, &mut ()))
     }
     fn data_length_of_list(&mut self, list_id: &List) -> Result<i64, Self::Error> {
+        self.use_uninitialized_list(list_id)?;
         Ok(self.list(list_id)?.length())
     }
 }

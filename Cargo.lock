@@ -100,9 +100,9 @@ dependencies = [
 
 [[package]]
 name = "either"
-version = "1.15.0"
+version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
+checksum = "91622ff5e7162018101f2fea40d6ebf4a78bbe5a49736a2020649edf9693679e"
 
 [[package]]
 name = "equivalent"
@@ -273,6 +273,7 @@ name = "scratch-test-interpreter"
 version = "0.1.0"
 dependencies = [
  "derive-getters",
+ "either",
  "rand",
  "scratch-test-model",
  "scratch-test-value",
@@ -282,7 +283,7 @@ dependencies = [
 [[package]]
 name = "scratch-test-model"
 version = "0.1.0"
-source = "git+https://github.com/Marcel-Scherzinger/scratch-test-model#32ebf8d648f9cd4f117ba7e39c3c989e1a7c1e6b"
+source = "git+https://github.com/Marcel-Scherzinger/scratch-test-model#ffbcb591bb27dae21334fac6c196fb49b6ab764b"
 dependencies = [
  "const-str",
  "derive-getters",
@@ -299,7 +300,7 @@ dependencies = [
 [[package]]
 name = "scratch-test-model-proc"
 version = "0.1.0"
-source = "git+https://github.com/Marcel-Scherzinger/scratch-test-model#32ebf8d648f9cd4f117ba7e39c3c989e1a7c1e6b"
+source = "git+https://github.com/Marcel-Scherzinger/scratch-test-model#ffbcb591bb27dae21334fac6c196fb49b6ab764b"
 dependencies = [
  "convert_case 0.11.0",
  "proc-macro2",
