@@ -123,6 +123,10 @@ impl DefaultState {
         Ok(())
     }
 
+    pub fn output_lines(&self) -> impl DoubleEndedIterator<Item = (&SValue)> {
+        self.output_actions().map(|(_, text)| text)
+    }
+
     pub fn output_actions(&self) -> impl DoubleEndedIterator<Item = (&OutputKind, &SValue)> {
         self.actions().iter().flat_map(|a| {
             if let Action::Output { kind, message } = a {
