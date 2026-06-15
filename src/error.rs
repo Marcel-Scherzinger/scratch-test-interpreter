@@ -2,7 +2,7 @@ use crate::State;
 
 pub type RResult<T, S> = Result<T, RunError<<S as State>::Error>>;
 
-#[derive(Debug, PartialEq, Clone, thiserror::Error)]
+#[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
 pub enum InvalidFileError {
     #[error("statement calls procedure that doesn't exist in file")]
     CantFindProcedureForCall,
@@ -18,7 +18,7 @@ pub enum InvalidFileError {
     ReachedUnknownBlock(smodel::Id),
 }
 
-#[derive(Debug, PartialEq, Clone, thiserror::Error)]
+#[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
 pub enum UserError {
     #[error("without a body no data can change, so a condition-based loop will never stop")]
     ConditionLoopWithoutBodyNeverStops,
@@ -27,7 +27,7 @@ pub enum UserError {
     #[error("an infinite loop without a body can never halt")]
     InfiniteLoopWithoutBodyNeverStops,
 }
-#[derive(Debug, PartialEq, Clone, thiserror::Error)]
+#[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
 pub enum UnsupportedError {
     #[error("blocks related to cloning are not supported")]
     CloneBlocksNotSupported(smodel::Id),
@@ -41,7 +41,7 @@ pub enum UnsupportedError {
     UnsupportedMotionBlock,
 }
 
-#[derive(Debug, PartialEq, Clone, thiserror::Error)]
+#[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
 pub enum InternalError {
     #[error("saved instruction asks to remove stack frame, but no frames are stored")]
     PopOnEmptyArgumentFramesStack,

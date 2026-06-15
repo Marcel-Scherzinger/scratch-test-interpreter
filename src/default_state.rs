@@ -155,7 +155,7 @@ impl DefaultState {
     }
 }
 
-#[derive(Debug, PartialEq, Clone, thiserror::Error)]
+#[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
 pub enum DefaultStateError {
     #[error("variable {0:?} does not exist in state")]
     VariableNotFound(Variable),
