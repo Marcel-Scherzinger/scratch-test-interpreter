@@ -53,7 +53,7 @@ pub enum InternalError {
     PopOnEmptyProgramStack,
 }
 
-#[derive(Debug, PartialEq, Clone, thiserror::Error)]
+#[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
 pub enum LimitError {
     #[error("a string operation produced a text that is longer than allowed")]
     StringExceededLengthLimit(usize),
@@ -63,7 +63,7 @@ pub enum LimitError {
     MaxStackSizeExceeded,
 }
 
-#[derive(Debug, PartialEq, Clone, thiserror::Error)]
+#[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
 pub enum RunError<SErr> {
     #[error("state: {0}")]
     State(SErr),
