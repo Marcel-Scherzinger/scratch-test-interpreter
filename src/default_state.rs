@@ -71,6 +71,12 @@ impl DefaultState {
         }
     }
 
+    pub fn from_doc(doc: &ProjectDoc, max_list_length: i64) -> Self {
+        let mut s = Self::new();
+        s.add_data_from_doc(doc, max_list_length);
+        s
+    }
+
     pub fn add_data_from_doc(&mut self, doc: &ProjectDoc, max_length: i64) -> &mut Self {
         self.add_variables_from_doc(doc)
             .add_lists_from_doc(doc, max_length)
