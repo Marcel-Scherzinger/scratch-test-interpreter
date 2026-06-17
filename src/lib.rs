@@ -1,6 +1,6 @@
 mod builder;
 pub mod default_state;
-mod error;
+pub mod error;
 mod interpreter;
 mod state;
 
