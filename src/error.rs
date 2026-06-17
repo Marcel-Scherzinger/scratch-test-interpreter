@@ -3,6 +3,8 @@ use crate::State;
 pub type RResult<T, S> = Result<T, RunError<<S as State>::Error>>;
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 pub enum InvalidFileError {
     #[error("statement calls procedure that doesn't exist in file")]
     CantFindProcedureForCall,
@@ -19,6 +21,8 @@ pub enum InvalidFileError {
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 pub enum UserError {
     #[error("without a body no data can change, so a condition-based loop will never stop")]
     ConditionLoopWithoutBodyNeverStops,
@@ -28,6 +32,8 @@ pub enum UserError {
     InfiniteLoopWithoutBodyNeverStops,
 }
 #[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 pub enum UnsupportedError {
     #[error("blocks related to cloning are not supported")]
     CloneBlocksNotSupported(smodel::Id),
@@ -42,6 +48,8 @@ pub enum UnsupportedError {
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 pub enum InternalError {
     #[error("saved instruction asks to remove stack frame, but no frames are stored")]
     PopOnEmptyArgumentFramesStack,
@@ -54,6 +62,8 @@ pub enum InternalError {
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 pub enum LimitError {
     #[error("a string operation produced a text that is longer than allowed")]
     StringExceededLengthLimit(usize),
@@ -64,6 +74,8 @@ pub enum LimitError {
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 pub enum RunError<SErr> {
     #[error("state: {0}")]
     State(SErr),

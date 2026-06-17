@@ -162,6 +162,7 @@ impl DefaultState {
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DefaultStateError {
     #[error("variable {0:?} does not exist in state")]
     VariableNotFound(Variable),
