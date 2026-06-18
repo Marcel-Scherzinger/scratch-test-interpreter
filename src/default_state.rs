@@ -162,6 +162,8 @@ impl DefaultState {
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DefaultStateError {
     #[error("variable {0:?} does not exist in state")]

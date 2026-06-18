@@ -3,12 +3,15 @@ use crate::State;
 pub type RResult<T, S> = Result<T, RunError<<S as State>::Error>>;
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 pub enum InvalidFileError {
     #[error("statement calls procedure that doesn't exist in file")]
     CantFindProcedureForCall,
     #[error("found expression or comparison block when statement was expected")]
+    #[cfg_attr(feature = "utoipa", schema(value_type = String))]
     FoundExpressionWhenStmtExpected(smodel::Id),
     #[error("procedure call doesn't provide all arguments needed")]
     MissingArgForProcedureParameter,
@@ -17,10 +20,13 @@ pub enum InvalidFileError {
     #[error("block reference doesn't point to an existing block")]
     NoBlockFoundForReference(smodel::error::BlockReferenceInvalid),
     #[error("next block reference points to no block in file")]
+    #[cfg_attr(feature = "utoipa", schema(value_type = String))]
     ReachedUnknownBlock(smodel::Id),
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 pub enum UserError {
@@ -32,10 +38,13 @@ pub enum UserError {
     InfiniteLoopWithoutBodyNeverStops,
 }
 #[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 pub enum UnsupportedError {
     #[error("blocks related to cloning are not supported")]
+    #[cfg_attr(feature = "utoipa", schema(value_type = String))]
     CloneBlocksNotSupported(smodel::Id),
     #[error("sending of events is not unsupported")]
     EventSendingNotSupported,
@@ -48,6 +57,8 @@ pub enum UnsupportedError {
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 pub enum InternalError {
@@ -62,6 +73,8 @@ pub enum InternalError {
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 pub enum LimitError {
@@ -74,6 +87,8 @@ pub enum LimitError {
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, thiserror::Error)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 pub enum RunError<SErr> {
