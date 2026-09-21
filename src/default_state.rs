@@ -53,6 +53,7 @@ pub struct DefaultState {
 
     #[cfg(feature = "rand")]
     randoms: Option<rand::rngs::StdRng>,
+    predefined_randoms: Option<(svalue::ARc<[svalue::SNumber]>, usize)>,
 }
 
 #[allow(unused)]
@@ -68,6 +69,7 @@ impl DefaultState {
             answer_inputs: vec![],
             #[cfg(feature = "rand")]
             randoms: None,
+            predefined_randoms: None,
         }
     }
 
@@ -142,10 +144,26 @@ impl DefaultState {
             }
         })
     }
+    pub fn used_randoms(&self) -> impl DoubleEndedIterator<Item = &SNumber> {
+        self.actions().iter().flat_map(|a| {
+            if let Action::RequestRandom { received, .. } = a {
+                Some(received)
+            } else {
+                None
+            }
+        })
+    }
 
     #[cfg(feature = "rand")]
     pub fn set_randoms(&mut self, rng: Option<rand::rngs::StdRng>) -> &mut Self {
         self.randoms = rng;
+        self
+    }
+    pub fn set_predefined_randoms(
+        &mut self,
+        predefined: svalue::ARc<[svalue::SNumber]>,
+    ) -> &mut Self {
+        self.predefined_randoms = Some((predefined, 0));
         self
     }
     pub fn set_answers(&mut self, answers: Vec<svalue::ARc<str>>) -> &mut Self {
@@ -174,6 +192,11 @@ pub enum DefaultStateError {
     ListFull { id: List },
     #[error("program is not allowed to request random numbers")]
     RandomsDisabled,
+    #[error("program requested random number that doesn't match predefined ones")]
+    IncompatibleRandomRequested {
+        predefined: SNumber,
+        range: either::Either<(i64, i64), (f64, f64)>,
+    },
     #[error("program asked question without a predefined answer remaining")]
     NoMoreAnswers,
 }
@@ -203,24 +226,35 @@ impl State for DefaultState {
         }
     }
 
-    #[cfg(not(feature = "rand"))]
     fn request_int_random(
         &mut self,
         range: std::ops::RangeInclusive<i64>,
     ) -> Result<i64, Self::Error> {
-        Err(DefaultStateError::RandomsDisabled)
-    }
+        let received = if let Some((pred, pos)) = self.predefined_randoms.as_mut()
+            && let Some(received) = pred.get(*pos)
+        {
+            match received {
+                SNumber::Float(_) => {
+                    return Err(DefaultStateError::IncompatibleRandomRequested {
+                        predefined: *received,
+                        range: Either::Left(range.into_inner()),
+                    });
+                }
+                SNumber::Int(i) => {
+                    *pos += 1;
+                    *i
+                }
+            }
+        } else {
+            #[cfg(not(feature = "rand"))]
+            Err(DefaultStateError::RandomsDisabled)?;
+            #[cfg(feature = "rand")]
+            self.randoms
+                .as_mut()
+                .ok_or(DefaultStateError::RandomsDisabled)?
+                .random_range(range.clone())
+        };
 
-    #[cfg(feature = "rand")]
-    fn request_int_random(
-        &mut self,
-        range: std::ops::RangeInclusive<i64>,
-    ) -> Result<i64, Self::Error> {
-        let received = self
-            .randoms
-            .as_mut()
-            .ok_or(DefaultStateError::RandomsDisabled)?
-            .random_range(range.clone());
         let (from, to) = range.into_inner();
         self.actions.push(Action::RequestRandom {
             from: SNumber::Int(from),
@@ -230,23 +264,36 @@ impl State for DefaultState {
         Ok(received)
     }
 
-    #[cfg(not(feature = "rand"))]
-    fn request_float_random(
-        &mut self,
-        range: std::ops::RangeInclusive<f64>,
-    ) -> Result<f64, Self::Error> {
-        Err(DefaultStateError::RandomsDisabled)
-    }
     #[cfg(feature = "rand")]
     fn request_float_random(
         &mut self,
         range: std::ops::RangeInclusive<f64>,
     ) -> Result<f64, Self::Error> {
-        let received = self
-            .randoms
-            .as_mut()
-            .ok_or(DefaultStateError::RandomsDisabled)?
-            .random_range(range.clone());
+        let received = if let Some((pred, pos)) = self.predefined_randoms.as_mut()
+            && let Some(received) = pred.get(*pos)
+        {
+            match received {
+                SNumber::Int(_) => {
+                    return Err(DefaultStateError::IncompatibleRandomRequested {
+                        predefined: *received,
+                        range: Either::Right(range.into_inner()),
+                    });
+                }
+                SNumber::Float(i) => {
+                    *pos += 1;
+                    *i
+                }
+            }
+        } else {
+            #[cfg(not(feature = "rand"))]
+            Err(DefaultStateError::RandomsDisabled)?;
+            #[cfg(feature = "rand")]
+            self.randoms
+                .as_mut()
+                .ok_or(DefaultStateError::RandomsDisabled)?
+                .random_range(range.clone())
+        };
+
         let (from, to) = range.into_inner();
         self.actions.push(Action::RequestRandom {
             from: SNumber::Float(from),
@@ -255,7 +302,6 @@ impl State for DefaultState {
         });
         Ok(received)
     }
-
     fn write_output(&mut self, output_kind: crate::state::OutputKind, message: SValue) {
         self.actions.push(Action::Output {
             kind: output_kind,
