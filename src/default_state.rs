@@ -247,7 +247,7 @@ impl State for DefaultState {
             }
         } else {
             #[cfg(not(feature = "rand"))]
-            Err(DefaultStateError::RandomsDisabled)?;
+            return Err(DefaultStateError::RandomsDisabled);
             #[cfg(feature = "rand")]
             self.randoms
                 .as_mut()
@@ -264,7 +264,6 @@ impl State for DefaultState {
         Ok(received)
     }
 
-    #[cfg(feature = "rand")]
     fn request_float_random(
         &mut self,
         range: std::ops::RangeInclusive<f64>,
@@ -286,7 +285,7 @@ impl State for DefaultState {
             }
         } else {
             #[cfg(not(feature = "rand"))]
-            Err(DefaultStateError::RandomsDisabled)?;
+            return Err(DefaultStateError::RandomsDisabled);
             #[cfg(feature = "rand")]
             self.randoms
                 .as_mut()
