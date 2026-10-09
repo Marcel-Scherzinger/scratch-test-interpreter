@@ -195,6 +195,8 @@ pub enum DefaultStateError {
     #[error("program requested random number that doesn't match predefined ones")]
     IncompatibleRandomRequested {
         predefined: SNumber,
+        #[cfg_attr(feature = "utoipa", schema(value_type = Value))]
+        #[cfg_attr(feature = "schemars", schemars(skip))]
         range: either::Either<(i64, i64), (f64, f64)>,
     },
     #[error("program asked question without a predefined answer remaining")]
