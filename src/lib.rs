@@ -1,9 +1,4 @@
-mod builder;
-pub mod default_state;
-pub mod error;
-mod interpreter;
-mod state;
+//! > **Note**
+//! > This project was merged into [github:marcel-scherzinger/bast3st-scratch](https://github.com/marcel-scherzinger/bast3st-scratch)
 
-pub use builder::{Interpreter, Limits, Report};
-pub use error::RunError;
-pub use state::{OutputKind, State};
+pub use sinterp::*;

@@ -1,3 +1,7 @@
+> **Note**
+This project was merged into [github:marcel-scherzinger/bast3st-scratch](https://github.com/marcel-scherzinger/bast3st-scratch)
+
+
 [![Documentation on GitHub Pages](https://github.com/marcel-scherzinger/scratch-test-interpreter/actions/workflows/deploy-docs-to-pages.yml/badge.svg)](https://marcel-scherzinger.github.io/scratch-test-interpreter)
 [![100% Rust](https://img.shields.io/badge/Rust-100%25-32c955?logo=rust)](https://rust-lang.org)
 
